@@ -9,8 +9,11 @@ using namespace std;
 # define M_PI 3.14159265358979323846  
 #define INF 1006
 #define screenWidth 1400
-#define screenHeight 800
+#define screenHeight 900
 #define gameWidth 1000
+#define gameHeight 500
+#define viewWidth 1400
+#define viewHeight 400
 #define offset 2
 #define raceRadius 60
 

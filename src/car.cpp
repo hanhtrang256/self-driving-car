@@ -129,11 +129,6 @@ void Car::decide(const vector<float> &sensors) {
         inputs[i] = sensors[i];
     }
 
-    // for (int i = 0; i < (int)sensors.size(); ++i) {
-    //     cout << inputs[i] << " ";
-    // }
-    // cout << '\n';
-
     float outputs[8];
     nn.SGD_feedForward(inputs, outputs);
 
@@ -165,6 +160,22 @@ void Car::showRays(sf::RenderWindow &window, const vector<Wall> &walls, bool che
             drawLine(window, pos.x, pos.y, best.first.x, best.first.y, sf::Color::Cyan);
         }
     }
+}
+
+vector<float> Car::getViews(const vector<Wall> &walls, bool checkBound) {
+    vector<Wall> tmp = walls;
+    if (!checkBound) tmp.erase(tmp.begin() + 4);
+
+    float headingAngle = angle - 90;
+
+    vector<float> dist; 
+    for (float a = headingAngle - 90; a <= headingAngle + 90; ++a) {
+        Ray ray(pos, radians(a));
+        pair<Vector2, float> viewInfo = ray.looking(pos, tmp);
+        dist.push_back(viewInfo.second);
+    }
+
+    return dist;
 }
 
 bool Car::checkCollision(const vector<Wall> &walls, bool checkBound) {

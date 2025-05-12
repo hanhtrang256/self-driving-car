@@ -15,4 +15,6 @@ vector<pair<Vector2, Vector2>> buildRaceTrack(vector<Wall> &walls, const vector<
 
 void newRaceTrack(vector<Vector2> &checkPoints, vector<pair<Vector2, Vector2>> &checkLines, vector<Wall> &walls);
 
+void showCheckLines(sf::RenderWindow &window, const vector<Vector2> &checkPoints);
+
 #endif 

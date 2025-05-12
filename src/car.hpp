@@ -39,6 +39,7 @@ struct Car {
     vector<float> getSensors(const vector<Wall> &walls, bool checkBound);
     void decide(const vector<float> &sensors);
     void showRays(sf::RenderWindow &window, const vector<Wall> &walls, bool checkBound);
+    vector<float> getViews(const vector<Wall> &walls, bool checkBound);
     bool checkCollision(const vector<Wall> &walls,bool checkBound);
     bool passCheckPoint(pair<Vector2, Vector2> line);
 };

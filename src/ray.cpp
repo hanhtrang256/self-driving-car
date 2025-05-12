@@ -26,7 +26,7 @@ pair<Vector2, float> Ray::looking(const Vector2 &vehiclePos, const vector<Wall> 
     float x3 = pos.x, y3 = pos.y;
     float x4 = x3 + cos(angle), y4 = y3 + sin(angle);
 
-    float best = maxSight;
+    float best = INF;
     Vector2 bestPoint = Vector2(INF, INF);
 
     for (int i = 0; i < (int)walls.size(); ++i) {

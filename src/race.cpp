@@ -9,7 +9,7 @@ vector<Vector2> buildConvexHull(int noisy) {
     float trackOffset = 60;
     for (int i = 0; i < noisy; ++i) {
         P.push_back(Vector2(random(offset + trackOffset, gameWidth - offset - trackOffset), 
-                            random(offset + trackOffset, screenHeight - offset - trackOffset)));
+                            random(offset + trackOffset, gameHeight - offset - trackOffset)));
     }
 
 	int n = P.size(), k = 0;
@@ -90,4 +90,41 @@ void newRaceTrack(vector<Vector2> &checkPoints, vector<pair<Vector2, Vector2>> &
 
     checkPoints = buildConvexHull(30);
     checkLines = buildRaceTrack(walls, checkPoints);
+}
+
+void showCheckLines(sf::RenderWindow &window, const vector<Vector2> &checkPoints) {
+    // Draw race track
+    for (int i = 0; i < (int)checkPoints.size(); ++i) {
+        // Draw checkpoints
+        sf::CircleShape circ;
+        if (i == 0) {
+            circ.setFillColor(sf::Color::Blue);
+        }
+        else if (i == 1) {
+            circ.setFillColor(sf::Color::Green);
+        }
+        else circ.setFillColor(sf::Color::White);
+
+        circ.setRadius(5);
+        circ.setPosition(sf::Vector2f(checkPoints[i].x - 5, checkPoints[i].y - 5));
+        window.draw(circ);
+
+        int pre = (i - 1 + (int)checkPoints.size()) % (int)checkPoints.size();
+        int nxt = (i + 1) % (int)checkPoints.size();
+
+        // Draw checkpoint lines
+        Vector2 preLine = Vector2::sub(checkPoints[i], checkPoints[pre]);
+        Vector2 nxtLine = Vector2::sub(checkPoints[nxt], checkPoints[i]);
+
+        Vector2 biVector = Vector2::add(preLine, nxtLine);
+        biVector.setMag(1);
+
+        Vector2 normalIn = Vector2::newRotate(biVector, radians(90));
+        Vector2 normalOut = Vector2::newRotate(biVector, radians(-90));
+        normalOut.setMag(raceRadius);
+        normalIn.setMag(raceRadius);
+
+        drawLine(window, checkPoints[i].x, checkPoints[i].y, checkPoints[i].x + normalOut.x, checkPoints[i].y + normalOut.y, sf::Color::Yellow);
+        drawLine(window, checkPoints[i].x, checkPoints[i].y, checkPoints[i].x + normalIn.x, checkPoints[i].y + normalIn.y, sf::Color::Red);
+    }
 }

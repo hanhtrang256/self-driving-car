@@ -166,41 +166,7 @@ void update(sf::RenderWindow &window, vector<Vector2> &checkPoints, vector<pair<
 }
 
 void draw(sf::RenderWindow &window, const vector<Vector2> &checkPoints) {
-    // Draw race track
-    for (int i = 0; i < (int)checkPoints.size(); ++i) {
-        // Draw checkpoints
-        sf::CircleShape circ;
-        if (i == 0) {
-            circ.setFillColor(sf::Color::Blue);
-        }
-        else if (i == 1) {
-            circ.setFillColor(sf::Color::Green);
-        }
-        else circ.setFillColor(sf::Color::White);
-
-        circ.setRadius(5);
-        circ.setPosition(sf::Vector2f(checkPoints[i].x - 5, checkPoints[i].y - 5));
-        window.draw(circ);
-
-        int pre = (i - 1 + (int)checkPoints.size()) % (int)checkPoints.size();
-        int nxt = (i + 1) % (int)checkPoints.size();
-
-        // Draw checkpoint lines
-        Vector2 preLine = Vector2::sub(checkPoints[i], checkPoints[pre]);
-        Vector2 nxtLine = Vector2::sub(checkPoints[nxt], checkPoints[i]);
-
-        Vector2 biVector = Vector2::add(preLine, nxtLine);
-        biVector.setMag(1);
-
-        Vector2 normalIn = Vector2::newRotate(biVector, radians(90));
-        Vector2 normalOut = Vector2::newRotate(biVector, radians(-90));
-        normalOut.setMag(raceRadius);
-        normalIn.setMag(raceRadius);
-
-        drawLine(window, checkPoints[i].x, checkPoints[i].y, checkPoints[i].x + normalOut.x, checkPoints[i].y + normalOut.y, sf::Color::Yellow);
-        drawLine(window, checkPoints[i].x, checkPoints[i].y, checkPoints[i].x + normalIn.x, checkPoints[i].y + normalIn.y, sf::Color::Red);
-    }
-
+    showCheckLines(window, checkPoints);
     // Draw walls
     for (int i = 0; i < (int)walls.size(); ++i) {
         walls[i].show(window);
@@ -218,17 +184,39 @@ void draw(sf::RenderWindow &window, const vector<Vector2> &checkPoints) {
     // Draw cars
     if (bestMode) {
         if (carBest != nullptr) {
-            // carBest->showRays(window, walls, false);
+            carBest->showRays(window, walls, false);
             carBest->show(window);
         }
     }
     else {
         for (int i = 0; i < (int)cars.size(); ++i) {
-            cars[i]->showRays(window, walls, true);
+            bool hasBound = true;
+            if ((int)cars[i]->reachedCheckPts.size() >= 3) {
+                hasBound = false;
+            }
+            cars[i]->showRays(window, walls, hasBound);
             cars[i]->show(window);
         }
     }
 
+    // Draw 3d view
+    if (bestMode) {
+        if (carBest == nullptr) return;
+        vector<float> visions = carBest->getViews(walls, false);
+        float visionWidth = (float)viewWidth / (float)visions.size();
+        for (int i = 0; i < (int)visions.size(); ++i) {
+            sf::RectangleShape shape;
+            int mapColorValue = 255.0 - (int)((visions[i] / (float)viewWidth) * 255.0f);
+            mapColorValue = std::clamp(mapColorValue, 0, 255);
+            shape.setFillColor(sf::Color(mapColorValue, mapColorValue, mapColorValue));
+
+            float mapHeight = viewHeight * (1 - (visions[i] / (float)viewWidth));
+            if (mapHeight < 1.0) mapHeight = 1.0;
+            shape.setPosition(sf::Vector2f(i * visionWidth, viewHeight + 100 + viewHeight / 2.0f - mapHeight / 2.0f));
+            shape.setSize(sf::Vector2f(visionWidth, mapHeight));
+            window.draw(shape);
+        }
+    }
 }
 
 int main() {
@@ -242,25 +230,26 @@ int main() {
     }
 
     float infoX = gameWidth + 50;
+    float buttonWidth = 100, buttonHeight = 70;
     // Setup buttons 
-    bestButton = RectButton(infoX, 100, 150, 100, "green");
-    trainButton = RectButton(infoX, 250, 150, 100, "blue");
-    mapButton = RectButton(infoX, 400, 150, 100);
+    bestButton = RectButton(infoX, 20, buttonWidth, buttonHeight, "green");
+    trainButton = RectButton(infoX, 100, buttonWidth, buttonHeight, "blue");
+    mapButton = RectButton(infoX, 180, buttonWidth, buttonHeight);
 
     // Information text
     textGen.setFont(font);
-    textGen.setCharacterSize(30);
-    textGen.setPosition(infoX, 550);
+    textGen.setCharacterSize(20);
+    textGen.setPosition(infoX, 260);
 
     textMF.setFont(font);
-    textMF.setCharacterSize(30);
-    textMF.setPosition(infoX, 650);
+    textMF.setCharacterSize(20);
+    textMF.setPosition(infoX, 280);
 
     // surrounding screen
     walls.push_back(Wall(offset, offset, gameWidth - offset, offset)); // top
-    walls.push_back(Wall(offset, screenHeight - offset, gameWidth - offset, screenHeight - offset)); // bottom
-    walls.push_back(Wall(offset, offset, offset, screenHeight - offset)); // left
-    walls.push_back(Wall(gameWidth - offset, offset, gameWidth - offset, screenHeight - offset)); // right
+    walls.push_back(Wall(offset, gameHeight - offset, gameWidth - offset, gameHeight - offset)); // bottom
+    walls.push_back(Wall(offset, offset, offset, gameHeight - offset)); // left
+    walls.push_back(Wall(gameWidth - offset, offset, gameWidth - offset, gameHeight - offset)); // right
 
     // Build race track information
     newRaceTrack(checkPoints, checkLines, walls);
