@@ -1,0 +1,2 @@
+all:
+	g++ -O3 -std=c++17 src/*.cpp src/NeuralNetwork/*.cpp src/utils/*.cpp -I "D:\SFML_Library_Download\SFML-2.6.2\include" -L "D:\SFML_Library_Download\SFML-2.6.2\lib" -o main.exe -lsfml-graphics -lsfml-window -lsfml-system
